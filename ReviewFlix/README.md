@@ -1,6 +1,6 @@
 # ReviewFlix
 
-ReviewFlix es la parte frontend del proyecto. La app esta pensada para mostrar peliculas, reseñas e interacciones de usuario, mientras que la moderacion de texto queda a cargo de una API de Python separada para detectar palabras malas.
+ReviewFlix es la parte frontend con backend integrado por firebase del proyecto. La app esta pensada para mostrar peliculas, reseñas e interacciones de usuario, mientras que la moderacion de texto queda a cargo de una API de Python separada para detectar palabras malas.
 
 ## Stack
 
