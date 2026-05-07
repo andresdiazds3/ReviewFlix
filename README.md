@@ -1,3 +1,45 @@
 # ReviewFlix
 
-ReviwFlix, is a movie review app, that is being developed using data structrues and algorithms. You as an user will be able to register and login to the app. Once you´re in you will be able to rate the movie catalog, add comments, make friends find suggested friends and movies according to your taste!
+ReviewFlix es una app de resenas de peliculas. Como usuario, podes registrarte, iniciar sesion, calificar peliculas, comentar y descubrir recomendaciones segun tus gustos.
+
+## Tecnologias
+
+### Frontend
+- React
+- TypeScript
+- Vite
+- Tailwind CSS
+
+### Backend
+- Node.js
+- Express
+- TypeScript
+- bcrypt
+- jsonwebtoken
+- dotenv
+
+## Como prender el proyecto
+
+### Requisitos
+- Node.js (version 18 o superior recomendada)
+- npm
+
+### 1. Levantar el backend
+```bash
+cd ReviewFlixBackend
+npm install
+npm run dev
+```
+
+### 2. Levantar el frontend
+En otra terminal:
+
+```bash
+cd ReviewFlixFrontend
+npm install
+npm run dev
+```
+
+Con eso deberias tener:
+- Backend corriendo en su puerto configurado
+- Frontend disponible en la URL que muestra Vite (normalmente `http://localhost:5173`)
