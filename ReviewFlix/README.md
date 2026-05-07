@@ -1,11 +1,28 @@
+# ReviewFlix
 
-  # ReviewFlix
+ReviewFlix es la parte frontend del proyecto. La app esta pensada para mostrar peliculas, reseñas e interacciones de usuario, mientras que la moderacion de texto queda a cargo de una API de Python separada para detectar palabras malas.
 
-  This is a code bundle for ReviewFlix. The original project is available at https://www.figma.com/design/gZEbpZhLvTzqrOg7fvhtbA/ReviewFlix.
+## Stack
 
-  ## Running the code
+- React
+- TypeScript
+- Vite
+- Tailwind CSS
 
-  Run `npm i` to install the dependencies.
+## Ejecutar el frontend
 
-  Run `npm run dev` to start the development server.
+Requisitos:
+- Node.js 18 o superior recomendado
+- npm
+
+```bash
+npm install
+npm run dev
+```
+
+El servidor de desarrollo queda disponible en la URL que muestra Vite, normalmente `http://localhost:5173`.
+
+## Integracion
+
+El frontend consume la API de Python para validar comentarios y filtrar lenguaje ofensivo antes de mostrar o publicar el contenido.
   
