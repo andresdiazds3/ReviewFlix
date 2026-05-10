@@ -2,10 +2,12 @@ import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router";
 import { Search, Home, Trophy, Users, MessageCircle, Bookmark, Film, ChevronDown, X } from "lucide-react";
 import { currentUser, movies } from "../data/mockData";
+import { useAuthContext } from "../../context/AuthorizationContext";
 
 export function Navbar() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { user, signOut } = useAuthContext();
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -114,13 +116,38 @@ export function Navbar() {
           </div>
 
           {/* Profile */}
-          <button
-            onClick={() => navigate("/profile")}
-            className="flex items-center gap-2 p-1 rounded-xl hover:bg-white/5 transition-all"
-          >
-            <img src={currentUser.avatar} alt="" className="w-8 h-8 rounded-lg object-cover" />
-            <ChevronDown size={14} className="text-gray-500 hidden sm:block" />
-          </button>
+          {user ? (
+            <button
+              onClick={() => navigate("/profile")}
+              className="flex items-center gap-2 p-1 rounded-xl hover:bg-white/5 transition-all"
+            >
+              <img src={user.photoURL || currentUser.avatar} alt="" className="w-8 h-8 rounded-lg object-cover" />
+              <ChevronDown size={14} className="text-gray-500 hidden sm:block" />
+            </button>
+          ) : (
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => navigate("/login")}
+                className="px-3 py-2 rounded-xl border border-white/10 text-sm text-gray-300 hover:bg-white/5"
+              >
+                Login
+              </button>
+              <button
+                onClick={() => navigate("/register")}
+                className="px-3 py-2 rounded-xl bg-[#e50914] text-sm text-white hover:bg-[#c20810]"
+              >
+                Register
+              </button>
+            </div>
+          )}
+          {user && (
+            <button
+              onClick={() => signOut().then(() => navigate("/login"))}
+              className="hidden xl:inline-flex px-3 py-2 rounded-xl border border-white/10 text-sm text-gray-300 hover:bg-white/5"
+            >
+              Salir
+            </button>
+          )}
         </div>
       </div>
     </nav>
