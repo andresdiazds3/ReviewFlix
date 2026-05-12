@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Navigate } from "react-router";
 import { useAuthContext } from "../../context/AuthorizationContext";
+import { useDocument } from "../../hooks/useDocument";
 import { updateUserProfile, validateProfile } from "../../services/auth";
 
 type ProfileFormState = {
@@ -13,6 +14,7 @@ type ProfileFormState = {
 // Loads the current Firebase auth user and lets them edit Firestore profile fields.
 export function UserProfile() {
   const { user, loading, signOut } = useAuthContext();
+  const { document: profileDoc } = useDocument("users", user?.uid ?? "");
   const [form, setForm] = useState<ProfileFormState>({
     displayName: "",
     bio: "",
@@ -26,10 +28,10 @@ export function UserProfile() {
     if (!user) return;
     setForm({
       displayName: user.displayName ?? "",
-      bio: "",
+      bio: typeof profileDoc?.bio === "string" ? profileDoc.bio : "",
       photoURL: user.photoURL ?? "",
     });
-  }, [user]);
+  }, [user, profileDoc]);
 
   // Keep the form state in sync with input changes.
   function handleChange(field: keyof ProfileFormState, value: string) {
@@ -78,6 +80,7 @@ export function UserProfile() {
               <p className="text-xs uppercase tracking-[0.3em] text-gray-500 mb-2">Mi perfil</p>
               <h1 className="text-3xl font-bold">{form.displayName || user.displayName || "Usuario"}</h1>
               <p className="text-sm text-gray-400 mt-2">{user.email}</p>
+              {form.bio && <p className="mt-4 text-sm text-gray-300 max-w-xl">{form.bio}</p>}
               <button
                 onClick={() => signOut()}
                 className="mt-4 rounded-xl border border-white/10 px-4 py-2 text-sm text-gray-300 hover:bg-white/5"

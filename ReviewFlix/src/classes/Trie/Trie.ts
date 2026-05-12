@@ -1,5 +1,5 @@
-import  { TrieNode } from "./TrieNode";
-import Movie from "../Movie";
+import { TrieNode } from "./TrieNode";
+import type { Movie } from "../../types/Movie";
 
 export class Trie {
     root: TrieNode;
@@ -8,16 +8,37 @@ export class Trie {
         this.root = new TrieNode();
     }
 
-    insert(product: Movie) {
+    insert(movie: Movie) {
+        const terms = new Set<string>();
+        terms.add(movie.title);
+        for (const genre of movie.genres) {
+            terms.add(genre);
+        }
+        for (const token of movie.searchTokens) {
+            terms.add(token);
+        }
+
+        for (const term of terms) {
+            this.insertTerm(term, movie);
+        }
+    }
+
+    private insertTerm(term: string, movie: Movie) {
         let currentNode = this.root;
-        for (const char of product.name.toLowerCase()) {
+        const normalized = term.trim().toLowerCase();
+
+        if (!normalized) {
+            return;
+        }
+
+        for (const char of normalized) {
             if (!currentNode.children.has(char)) {
                 currentNode.children.set(char, new TrieNode());
             }
             currentNode = currentNode.children.get(char)!;
         }
         currentNode.endWord = true;
-        currentNode.movies.push(product);
+        currentNode.movies.push(movie);
     }
 
     findSuggestions(prefix: string): Movie[] {
@@ -30,7 +51,7 @@ export class Trie {
         }
         const results: Movie[] = [];
         this.collectAll(currentNode, results);
-        return results
+        return results;
     }
 
     collectAll(node: TrieNode, results: Movie[]) {

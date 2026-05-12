@@ -19,6 +19,10 @@ export const useDocument = (
     useState<any>(null);
 
   useEffect(() => {
+    if (!id) {
+      setDocument(null);
+      return;
+    }
 
     const ref =
       doc(db, collectionName, id);

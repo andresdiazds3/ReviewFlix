@@ -1,4 +1,4 @@
-import Movie from "../Movie";
+import type { Movie } from "../../types/Movie";
 
 export class TrieNode {
     children: Map<string, TrieNode>;

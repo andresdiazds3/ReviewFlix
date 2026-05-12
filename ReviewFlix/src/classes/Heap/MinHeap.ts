@@ -1,4 +1,4 @@
-import Movie from "../Movie";
+import type { Movie } from "../../types/Movie";
 
 export class MinHeap {
     heap: Movie[];
@@ -45,10 +45,10 @@ export class MinHeap {
             const left = 2*curr + 1;
             const right = 2*curr + 2;
 
-            const minChild = (right < this.heap.length && this.heap[right].rate < this.heap[left].rate) 
+            const minChild = (right < this.heap.length && this.heap[right].avgRating < this.heap[left].avgRating) 
             ? right : left;
 
-            if (this.heap[curr].rate > this.heap[minChild].rate) {
+            if (this.heap[curr].avgRating > this.heap[minChild].avgRating) {
                 this.swap(curr, minChild);
                 curr = minChild;
             }else {
@@ -62,7 +62,7 @@ export class MinHeap {
 
         while(curr > 0) {
             const parent = Math.floor((curr - 1) / 2);
-            if (this.heap[curr].rate < this.heap[parent].rate) {
+            if (this.heap[curr].avgRating < this.heap[parent].avgRating) {
                 this.swap(curr, parent);
                 curr = parent;
             } else {
