@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router";
-import { Search, Home, Trophy, Users, MessageCircle, Bookmark, Film, ChevronDown, X } from "lucide-react";
+import { Search, Home, Trophy, Users, MessageCircle, Bookmark, Film, ChevronDown, X, Clock, Trash2 } from "lucide-react";
 import { currentUser, movies } from "../data/mockData";
 import { useAuthContext } from "../../context/AuthorizationContext";
+import { useRecentSearches } from "../../hooks/useRecentSearches";
 
 export function Navbar() {
   const location = useLocation();
@@ -10,10 +11,19 @@ export function Navbar() {
   const { user, signOut } = useAuthContext();
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const { recentSearches, addSearch, removeSearch, clearSearches } = useRecentSearches();
 
   const filtered = searchQuery.length > 1
     ? movies.filter(m => m.title.toLowerCase().includes(searchQuery.toLowerCase())).slice(0, 5)
     : [];
+
+  // Manejar búsqueda personalizada (cualquier tipo)
+  const handleCustomSearch = (query: string) => {
+    if (query.trim()) {
+      addSearch(query, "keyword");
+      setSearchQuery("");
+    }
+  };
 
   const navLinks = [
     { to: "/home", icon: Home, label: "Inicio" },
@@ -90,26 +100,128 @@ export function Navbar() {
                   autoFocus
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
-                  placeholder="Buscar películas..."
+                  onKeyPress={(e) => {
+                    if (e.key === "Enter" && searchQuery.trim()) {
+                      handleCustomSearch(searchQuery);
+                    }
+                  }}
+                  placeholder="Buscar películas, géneros..."
                   className="bg-transparent text-white text-sm outline-none flex-1 placeholder-gray-500"
                 />
                 <button onClick={() => { setSearchOpen(false); setSearchQuery(""); }}>
                   <X size={14} className="text-gray-500 hover:text-white" />
                 </button>
-                {filtered.length > 0 && (
-                  <div className="absolute top-full mt-2 left-0 right-0 bg-[#111] border border-white/10 rounded-xl overflow-hidden z-50 shadow-2xl">
-                    {filtered.map(m => (
-                      <button key={m.id}
-                        className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-white/5 transition-colors text-left"
-                        onClick={() => { navigate(`/movie/${m.id}`); setSearchOpen(false); setSearchQuery(""); }}
-                      >
-                        <img src={m.poster} alt={m.title} className="w-8 h-12 object-cover rounded" />
-                        <div>
-                          <p className="text-white text-sm">{m.title}</p>
-                          <p className="text-gray-500 text-xs">{m.year} · {m.genres[0]}</p>
+                
+                {/* Dropdown de resultados o búsquedas recientes */}
+                {(filtered.length > 0 || (searchQuery.length <= 1 && recentSearches.length > 0)) && (
+                  <div className="absolute top-full mt-2 left-0 right-0 bg-[#111] border border-white/10 rounded-xl overflow-hidden z-50 shadow-2xl max-h-96 overflow-y-auto">
+                    {/* Si hay query y hay resultados, mostrar películas */}
+                    {filtered.length > 0 ? (
+                      <>
+                        {filtered.map(m => (
+                          <button key={m.id}
+                            className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-white/5 transition-colors text-left"
+                            onClick={() => {
+                              addSearch(m.title, "movie");
+                              navigate(`/movie/${m.id}`);
+                              setSearchOpen(false);
+                              setSearchQuery("");
+                            }}
+                          >
+                            <img src={m.poster} alt={m.title} className="w-8 h-12 object-cover rounded" />
+                            <div className="flex-1">
+                              <p className="text-white text-sm">{m.title}</p>
+                              <p className="text-gray-500 text-xs">{m.year} · {m.genres[0]}</p>
+                            </div>
+                            <span className="text-xs bg-[#e50914]/20 text-[#e50914] px-2 py-1 rounded">Película</span>
+                          </button>
+                        ))}
+                        {/* Opción para agregar búsqueda personalizada */}
+                        {searchQuery.trim() && (
+                          <button
+                            onClick={() => handleCustomSearch(searchQuery)}
+                            className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-white/5 transition-colors text-left border-t border-white/5"
+                          >
+                            <Search size={13} className="text-gray-600" />
+                            <div className="flex-1">
+                              <p className="text-white text-sm">Buscar "{searchQuery}"</p>
+                              <p className="text-gray-500 text-xs">Guardar búsqueda personalizada</p>
+                            </div>
+                            <span className="text-xs bg-blue-500/20 text-blue-400 px-2 py-1 rounded">Custom</span>
+                          </button>
+                        )}
+                      </>
+                    ) : (
+                      // Si no hay query, mostrar búsquedas recientes
+                      <>
+                        <div className="px-3 py-2 border-b border-white/5 flex items-center justify-between bg-[#0a0a0a]/50 sticky top-0">
+                          <div className="flex items-center gap-2">
+                            <Clock size={13} className="text-gray-500" />
+                            <span className="text-xs text-gray-500 font-medium">Búsquedas recientes</span>
+                          </div>
+                          {recentSearches.length > 0 && (
+                            <button
+                              onClick={clearSearches}
+                              className="text-xs text-gray-600 hover:text-gray-400 transition-colors"
+                            >
+                              Limpiar
+                            </button>
+                          )}
                         </div>
-                      </button>
-                    ))}
+                        {recentSearches.length > 0 ? (
+                          recentSearches.map((search, idx) => {
+                            const typeColors: Record<string, string> = {
+                              movie: "bg-[#e50914]/20 text-[#e50914]",
+                              genre: "bg-purple-500/20 text-purple-400",
+                              keyword: "bg-blue-500/20 text-blue-400",
+                            };
+                            const typeLabel: Record<string, string> = {
+                              movie: "Película",
+                              genre: "Género",
+                              keyword: "Palabra clave",
+                            };
+                            const typeIcons: Record<string, any> = {
+                              movie: "🎬",
+                              genre: "🎭",
+                              keyword: "🔍",
+                            };
+                            
+                            return (
+                              <div
+                                key={idx}
+                                className="w-full flex items-center justify-between px-3 py-2.5 hover:bg-white/5 transition-colors group"
+                              >
+                                <button
+                                  className="flex-1 flex items-center gap-2 text-left"
+                                  onClick={() => {
+                                    setSearchQuery(search.query);
+                                  }}
+                                >
+                                  <Clock size={13} className="text-gray-600 flex-shrink-0" />
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-white text-sm truncate">{search.query}</p>
+                                    <p className="text-gray-600 text-xs">{typeLabel[search.type || "keyword"]}</p>
+                                  </div>
+                                </button>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    removeSearch(search.query);
+                                  }}
+                                  className="p-1 text-gray-600 hover:text-gray-400 opacity-0 group-hover:opacity-100 transition-all flex-shrink-0"
+                                >
+                                  <Trash2 size={12} />
+                                </button>
+                              </div>
+                            );
+                          })
+                        ) : (
+                          <div className="px-3 py-6 text-center">
+                            <p className="text-gray-500 text-sm">No hay búsquedas recientes</p>
+                          </div>
+                        )}
+                      </>
+                    )}
                   </div>
                 )}
               </div>
