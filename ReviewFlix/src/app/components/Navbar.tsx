@@ -23,11 +23,13 @@ export function Navbar() {
     { to: "/watchlist", icon: Bookmark, label: "Watchlist" },
   ];
 
+  const logoTarget = user ? "/home" : "/";
+
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 h-16 bg-[#0a0a0a]/95 backdrop-blur-md border-b border-white/[0.06]">
       <div className="max-w-7xl mx-auto h-full px-6 flex items-center gap-6">
         {/* Logo */}
-        <Link to="/home" className="flex items-center gap-2 flex-shrink-0">
+        <Link to={logoTarget} className="flex items-center gap-2 flex-shrink-0">
           <div className="w-8 h-8 bg-[#e50914] rounded-lg flex items-center justify-center">
             <Film size={16} className="text-white" />
           </div>
@@ -36,40 +38,46 @@ export function Navbar() {
           </span>
         </Link>
 
-        {/* Nav links */}
-        <div className="hidden lg:flex items-center gap-1 flex-1">
-          {navLinks.map(({ to, icon: Icon, label }) => {
-            const active = location.pathname === to || location.pathname.startsWith(to + "/");
-            return (
-              <Link
-                key={to}
-                to={to}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm transition-all duration-200 ${
-                  active
-                    ? "bg-[#e50914]/10 text-[#e50914]"
-                    : "text-gray-400 hover:text-white hover:bg-white/5"
-                }`}
-              >
-                <Icon size={15} />
-                {label}
-              </Link>
-            );
-          })}
-        </div>
+        {/* Nav links (only show when authenticated) */}
+        {user ? (
+          <>
+            <div className="hidden lg:flex items-center gap-1 flex-1">
+              {navLinks.map(({ to, icon: Icon, label }) => {
+                const active = location.pathname === to || location.pathname.startsWith(to + "/");
+                return (
+                  <Link
+                    key={to}
+                    to={to}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm transition-all duration-200 ${
+                      active
+                        ? "bg-[#e50914]/10 text-[#e50914]"
+                        : "text-gray-400 hover:text-white hover:bg-white/5"
+                    }`}
+                  >
+                    <Icon size={15} />
+                    {label}
+                  </Link>
+                );
+              })}
+            </div>
 
-        {/* Mobile nav */}
-        <div className="flex lg:hidden items-center gap-1 flex-1 overflow-x-auto scrollbar-hide">
-          {navLinks.map(({ to, icon: Icon }) => {
-            const active = location.pathname === to;
-            return (
-              <Link key={to} to={to}
-                className={`p-2 rounded-lg flex-shrink-0 transition-all ${active ? "text-[#e50914]" : "text-gray-500"}`}
-              >
-                <Icon size={18} />
-              </Link>
-            );
-          })}
-        </div>
+            {/* Mobile nav */}
+            <div className="flex lg:hidden items-center gap-1 flex-1 overflow-x-auto scrollbar-hide">
+              {navLinks.map(({ to, icon: Icon }) => {
+                const active = location.pathname === to;
+                return (
+                  <Link key={to} to={to}
+                    className={`p-2 rounded-lg flex-shrink-0 transition-all ${active ? "text-[#e50914]" : "text-gray-500"}`}
+                  >
+                    <Icon size={18} />
+                  </Link>
+                );
+              })}
+            </div>
+          </>
+        ) : (
+          <div className="flex-1" />
+        )}
 
         {/* Search + Actions */}
         <div className="flex items-center gap-3 flex-shrink-0">

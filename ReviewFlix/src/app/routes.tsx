@@ -1,4 +1,6 @@
+import React from "react";
 import { createBrowserRouter } from "react-router";
+import PrivateRoute from "./components/PrivateRoute";
 import { Landing } from "./pages/Landing";
 import { AppLayout } from "./pages/AppLayout";
 import { Home } from "./pages/Home";
@@ -21,15 +23,15 @@ export const router = createBrowserRouter([
     children: [
       { path: "/login", Component: Login },
       { path: "/register", Component: Register },
-      { path: "/home", Component: Home },
-      { path: "/movie/:id", Component: MovieDetail },
-      { path: "/rankings", Component: Rankings },
-      { path: "/social", Component: Social },
-      { path: "/chat", Component: Chat },
-      { path: "/chat/:userId", Component: Chat },
-      { path: "/profile", Component: UserProfile },
-      { path: "/profile/:id", Component: UserProfile },
-      { path: "/watchlist", Component: Watchlist },
+      { path: "/home", Component: () => <PrivateRoute><Home /></PrivateRoute> },
+      { path: "/movie/:id", Component: () => <PrivateRoute><MovieDetail /></PrivateRoute> },
+      { path: "/rankings", Component: () => <PrivateRoute><Rankings /></PrivateRoute> },
+      { path: "/social", Component: () => <PrivateRoute><Social /></PrivateRoute> },
+      { path: "/chat", Component: () => <PrivateRoute><Chat /></PrivateRoute> },
+      { path: "/chat/:userId", Component: () => <PrivateRoute><Chat /></PrivateRoute> },
+      { path: "/profile", Component: () => <PrivateRoute><UserProfile /></PrivateRoute> },
+      { path: "/profile/:id", Component: () => <PrivateRoute><UserProfile /></PrivateRoute> },
+      { path: "/watchlist", Component: () => <PrivateRoute><Watchlist /></PrivateRoute> },
     ],
   },
 ]);

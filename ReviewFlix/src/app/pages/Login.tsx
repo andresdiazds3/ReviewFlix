@@ -37,6 +37,9 @@ export function Login() {
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white flex items-center justify-center px-4 py-10">
       <div className="w-full max-w-md rounded-3xl border border-white/[0.08] bg-[#111] p-6 md:p-8 shadow-2xl">
+      <div className="mb-4 text-sm">
+        <a href="/" className="text-gray-400 hover:text-white">← Volver a Landing</a>
+      </div>
       <h2 className="text-2xl mb-2 font-semibold">Iniciar sesión</h2>
       <p className="text-sm text-gray-500 mb-6">Accede con Google o con tu correo y contraseña.</p>
       <button
