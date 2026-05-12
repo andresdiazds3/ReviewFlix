@@ -5,13 +5,7 @@ export default class Movie {
 	rate: number;
 	director: string;
 
-	constructor(
-		name: string,
-		genre: string,
-		sinopsis: string,
-		rate: number,
-		director: string
-	) {
+	constructor( name: string, genre: string, sinopsis: string, rate: number, director: string) {
 		this.name = name;
 		this.genre = genre;
 		this.sinopsis = sinopsis;
