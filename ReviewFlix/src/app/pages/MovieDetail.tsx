@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router";
 import { Star, Heart, Bookmark, Share2, Clock, Users, ChevronLeft, Send, ThumbsUp } from "lucide-react";
-import { movies, reviews, users, currentUser } from "../data/mockData";
+import { reviews, users, currentUser } from "../data/mockData";
+import useMovies from "../../hooks/useMovies";
 import { MovieCard } from "../components/MovieCard";
 import { StarRating } from "../components/StarRating";
 import { ReviewCard } from "../components/ReviewCard";
@@ -10,15 +11,37 @@ export function MovieDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
-  const movie = movies.find(m => m.id === id) || movies[0];
-  const movieReviews = reviews.filter(r => r.movieId === movie.id || reviews.indexOf(r) < 3);
-  const similar = movies.filter(m => m.id !== movie.id && m.genres.some(g => movie.genres.includes(g))).slice(0, 6);
-
+  const { movies, loading } = useMovies();
   const [userRating, setUserRating] = useState(0);
   const [reviewText, setReviewText] = useState("");
   const [isLiked, setIsLiked] = useState(false);
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#0a0a0a] text-white">
+        <div className="text-center">
+          <div className="mb-2">Cargando película…</div>
+        </div>
+      </div>
+    );
+  }
+
+  const movie = movies.find(m => m.id === id);
+  if (!movie) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#0a0a0a] text-white">
+        <div className="text-center">
+          <h2 className="text-xl font-bold">Película no encontrada</h2>
+          <p className="text-gray-400">La película solicitada no existe o aún no se ha sincronizado.</p>
+        </div>
+      </div>
+    );
+  }
+
+  const movieReviews = reviews.filter(r => r.movieId === movie.id || reviews.indexOf(r) < 3);
+  const similar = movies.filter(m => m.id !== movie.id && m.genres.some(g => movie.genres.includes(g))).slice(0, 6);
 
   const handleSubmit = () => {
     if (reviewText.trim() || userRating > 0) {
@@ -42,7 +65,7 @@ export function MovieDetail() {
 
       {/* Backdrop */}
       <div className="relative h-[55vh] min-h-[400px] overflow-hidden">
-        <img src={movie.backdrop} alt={movie.title} className="absolute inset-0 w-full h-full object-cover" />
+        <img src={movie.backdropUrl} alt={movie.title} className="absolute inset-0 w-full h-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/40 to-[#0a0a0a]/20" />
         <div className="absolute inset-0 bg-gradient-to-r from-[#0a0a0a] via-transparent to-transparent" />
 
@@ -63,7 +86,7 @@ export function MovieDetail() {
           <div className="lg:col-span-1">
             <div className="relative">
               <img
-                src={movie.poster}
+                src={movie.posterUrl}
                 alt={movie.title}
                 className="w-full max-w-xs mx-auto lg:mx-0 rounded-2xl shadow-2xl shadow-black/80 border border-white/10"
                 style={{ aspectRatio: "2/3", objectFit: "cover" }}
@@ -93,13 +116,13 @@ export function MovieDetail() {
                 <span className="text-gray-500 text-sm">Puntuación</span>
                 <div className="flex items-center gap-1.5">
                   <Star size={14} fill="#e50914" className="text-[#e50914]" />
-                  <span className="text-white" style={{ fontWeight: 700 }}>{movie.rating}</span>
+                  <span className="text-white" style={{ fontWeight: 700 }}>{movie.avgRating}</span>
                   <span className="text-gray-600 text-xs">/ 5</span>
                 </div>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-gray-500 text-sm">Votos</span>
-                <span className="text-white text-sm" style={{ fontWeight: 500 }}>{movie.votes.toLocaleString()}</span>
+                <span className="text-white text-sm" style={{ fontWeight: 500 }}>{movie.ratingCount.toLocaleString()}</span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-gray-500 text-sm">Duración</span>
@@ -139,11 +162,11 @@ export function MovieDetail() {
               <div className="flex items-center gap-2 mb-6">
                 <div className="flex items-center gap-1">
                   {Array(5).fill(0).map((_, i) => (
-                    <Star key={i} size={16} fill={i < Math.floor(movie.rating) ? "#e50914" : "transparent"} className={i < Math.floor(movie.rating) ? "text-[#e50914]" : "text-[#333]"} />
+                    <Star key={i} size={16} fill={i < Math.floor(movie.avgRating) ? "#e50914" : "transparent"} className={i < Math.floor(movie.avgRating) ? "text-[#e50914]" : "text-[#333]"} />
                   ))}
                 </div>
-                <span className="text-white" style={{ fontWeight: 700, fontSize: "20px" }}>{movie.rating}</span>
-                <span className="text-gray-600 text-sm">({movie.votes.toLocaleString()} valoraciones)</span>
+                <span className="text-white" style={{ fontWeight: 700, fontSize: "20px" }}>{movie.avgRating}</span>
+                <span className="text-gray-600 text-sm">({movie.ratingCount.toLocaleString()} valoraciones)</span>
               </div>
 
               <p className="text-gray-400 leading-relaxed">{movie.description}</p>
@@ -210,10 +233,10 @@ export function MovieDetail() {
         <div className="mt-12">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-white" style={{ fontWeight: 700, fontSize: "20px" }}>Reseñas de la comunidad</h2>
-            <div className="flex items-center gap-2">
-              <Users size={14} className="text-gray-500" />
-              <span className="text-gray-500 text-sm">{movie.votes.toLocaleString()} reseñas</span>
-            </div>
+              <div className="flex items-center gap-2">
+                <Users size={14} className="text-gray-500" />
+                <span className="text-gray-500 text-sm">{movie.ratingCount.toLocaleString()} reseñas</span>
+              </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {movieReviews.map(review => (

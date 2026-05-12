@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router";
 import { Star, Plus, Heart } from "lucide-react";
-import { Movie } from "../data/mockData";
+import type { Movie } from "../../types/Movie";
 
 interface MovieCardProps {
   movie: Movie;
@@ -24,7 +24,7 @@ export function MovieCard({ movie, size = "md", showRating = true }: MovieCardPr
     >
       <div className="absolute inset-0 rounded-xl overflow-hidden">
         <img
-          src={movie.poster}
+          src={movie.posterUrl}
           alt={movie.title}
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
         />
@@ -53,7 +53,7 @@ export function MovieCard({ movie, size = "md", showRating = true }: MovieCardPr
       {showRating && (
         <div className="absolute top-2 right-2 flex items-center gap-1 bg-black/80 backdrop-blur-sm rounded-md px-1.5 py-0.5">
           <Star size={10} fill="#e50914" className="text-[#e50914]" />
-          <span className="text-white text-xs">{movie.rating}</span>
+          <span className="text-white text-xs">{movie.avgRating}</span>
         </div>
       )}
 

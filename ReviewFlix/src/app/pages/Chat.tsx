@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
 import { Send, Search, MoreHorizontal, Star } from "lucide-react";
-import { users, movies, messages, currentUser } from "../data/mockData";
+import { users, messages, currentUser } from "../data/mockData";
+import useMovies from "../../hooks/useMovies";
 
 export function Chat() {
   const navigate = useNavigate();
@@ -10,6 +11,7 @@ export function Chat() {
   const [chatMessages, setChatMessages] = useState(messages);
 
   const activeUser = users.find(u => u.id === activeChat) || users[0];
+  const { movies } = useMovies();
 
   const conversations = users.map(u => ({
     user: u,
@@ -108,12 +110,12 @@ export function Chat() {
                         style={{ background: isMe ? "#e50914" : "#1a1a1a", border: "1px solid rgba(255,255,255,0.06)" }}
                         onClick={() => m && navigate(`/movie/${m.id}`)}
                       >
-                        {m && <img src={m.poster} alt={m.title} className="w-full h-32 object-cover" />}
+                        {m && <img src={m.posterUrl} alt={m.title} className="w-full h-32 object-cover" />}
                         <div className="px-3 py-2.5">
                           <p className="text-white text-sm" style={{ fontWeight: 600 }}>{m?.title}</p>
                           <div className="flex items-center gap-1 mt-1">
                             <Star size={10} fill={isMe ? "white" : "#e50914"} className={isMe ? "text-white" : "text-[#e50914]"} />
-                            <span className="text-xs" style={{ color: isMe ? "rgba(255,255,255,0.7)" : "#9ca3af" }}>{m?.rating} · {m?.year}</span>
+                            <span className="text-xs" style={{ color: isMe ? "rgba(255,255,255,0.7)" : "#9ca3af" }}>{m?.avgRating} · {m?.year}</span>
                           </div>
                         </div>
                       </div>

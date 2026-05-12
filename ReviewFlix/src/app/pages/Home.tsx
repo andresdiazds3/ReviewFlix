@@ -1,12 +1,14 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router";
 import { TrendingUp, Clock, Heart, Star, ChevronRight, Play, Sparkles } from "lucide-react";
-import { movies, reviews, users, currentUser, watchlistMovies } from "../data/mockData";
+import { reviews, users, currentUser, watchlistMovies } from "../data/mockData";
+import useMovies from "../../hooks/useMovies";
 import { MovieCard } from "../components/MovieCard";
 
 export function Home() {
   const navigate = useNavigate();
-  const featured = movies[0];
+  const { movies } = useMovies();
+  const featured = movies[0] ?? ({ id: "", title: "", year: 0, genres: [], duration: 0, backdropUrl: "", posterUrl: "", description: "", avgRating: 0 } as any);
 
   const trending = movies.slice(0, 6);
   const popular = movies.slice(2, 8);
@@ -20,7 +22,7 @@ export function Home() {
 
       {/* Hero Banner */}
       <div className="relative h-[70vh] min-h-[500px] overflow-hidden">
-        <img src={featured.backdrop} alt={featured.title} className="absolute inset-0 w-full h-full object-cover" />
+        <img src={featured.backdropUrl} alt={featured.title} className="absolute inset-0 w-full h-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-r from-[#0a0a0a] via-[#0a0a0a]/60 to-transparent" />
         <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-transparent" />
 
@@ -39,9 +41,9 @@ export function Home() {
               <span>{featured.genres.join(" · ")}</span>
               <span className="w-1 h-1 rounded-full bg-gray-600" />
               <span>{featured.duration} min</span>
-              <div className="flex items-center gap-1 text-[#e50914]">
+                <div className="flex items-center gap-1 text-[#e50914]">
                 <Star size={13} fill="#e50914" />
-                <span className="text-white" style={{ fontWeight: 600 }}>{featured.rating}</span>
+                <span className="text-white" style={{ fontWeight: 600 }}>{featured.avgRating}</span>
               </div>
             </div>
             <p className="text-gray-400 text-sm leading-relaxed mb-6 line-clamp-2">{featured.description}</p>
@@ -110,12 +112,12 @@ export function Home() {
                   return (
                     <div key={review.id} className="bg-[#111] border border-white/[0.06] rounded-2xl p-5 hover:border-white/10 transition-all">
                       <div className="flex gap-4">
-                        <img
-                          src={movie.poster}
-                          alt={movie.title}
-                          className="w-16 h-24 object-cover rounded-xl flex-shrink-0 cursor-pointer hover:opacity-80 transition-opacity"
-                          onClick={() => navigate(`/movie/${movie.id}`)}
-                        />
+                                <img
+                                  src={movie.posterUrl}
+                                  alt={movie.title}
+                                  className="w-16 h-24 object-cover rounded-xl flex-shrink-0 cursor-pointer hover:opacity-80 transition-opacity"
+                                  onClick={() => navigate(`/movie/${movie.id}`)}
+                                />
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-3 mb-2">
                             <img src={user.avatar} alt={user.name} className="w-8 h-8 rounded-full object-cover" />
@@ -166,7 +168,7 @@ export function Home() {
               <div className="space-y-3">
                 {watchlist.map(movie => (
                   <div key={movie.id} className="flex items-center gap-3 cursor-pointer group" onClick={() => navigate(`/movie/${movie.id}`)}>
-                    <img src={movie.poster} alt={movie.title} className="w-10 h-14 object-cover rounded-lg flex-shrink-0" />
+                    <img src={movie.posterUrl} alt={movie.title} className="w-10 h-14 object-cover rounded-lg flex-shrink-0" />
                     <div className="flex-1 min-w-0">
                       <p className="text-white text-sm truncate group-hover:text-[#e50914] transition-colors">{movie.title}</p>
                       <p className="text-gray-600 text-xs">{movie.genres[0]} · {movie.year}</p>

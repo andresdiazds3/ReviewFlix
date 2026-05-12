@@ -1,13 +1,21 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router";
 import { Trophy, GripVertical, Star, Users, Zap } from "lucide-react";
-import { movies, users, currentUser } from "../data/mockData";
+import { users, currentUser } from "../data/mockData";
+import useMovies from "../../hooks/useMovies";
 
 const topMovieIds = ["m1", "m3", "m5", "m7", "m9"];
 
 export function Rankings() {
   const navigate = useNavigate();
-  const [myTop, setMyTop] = useState(topMovieIds.map(id => movies.find(m => m.id === id)!).filter(Boolean));
+  const { movies } = useMovies();
+  const [myTop, setMyTop] = useState(() => topMovieIds.map(() => null as any).filter(Boolean));
+
+  useEffect(() => {
+    if (movies.length && myTop.length === 0) {
+      setMyTop(topMovieIds.map(id => movies.find(m => m.id === id)!).filter(Boolean));
+    }
+  }, [movies]);
   const dragIdx = useRef<number | null>(null);
   const dragOverIdx = useRef<number | null>(null);
 
@@ -83,8 +91,8 @@ export function Rankings() {
                     </div>
 
                     {/* Poster */}
-                    <img
-                      src={movie.poster}
+                        <img
+                      src={movie.posterUrl}
                       alt={movie.title}
                       className="w-14 h-20 object-cover rounded-xl flex-shrink-0"
                       onClick={() => navigate(`/movie/${movie.id}`)}
@@ -98,9 +106,9 @@ export function Rankings() {
                       <p className="text-gray-500 text-sm">{movie.year} · {movie.genres[0]}</p>
                       <div className="flex items-center gap-1 mt-1.5">
                         {Array(5).fill(0).map((_, si) => (
-                          <Star key={si} size={10} fill={si < Math.floor(movie.rating) ? "#e50914" : "transparent"} className={si < Math.floor(movie.rating) ? "text-[#e50914]" : "text-[#333]"} />
+                          <Star key={si} size={10} fill={si < Math.floor(movie.avgRating) ? "#e50914" : "transparent"} className={si < Math.floor(movie.avgRating) ? "text-[#e50914]" : "text-[#333]"} />
                         ))}
-                        <span className="text-gray-500 text-xs ml-1">{movie.rating}</span>
+                        <span className="text-gray-500 text-xs ml-1">{movie.avgRating}</span>
                       </div>
                     </div>
 
@@ -131,7 +139,7 @@ export function Rankings() {
                         return (
                           <div key={mid} className="flex-shrink-0 w-20 cursor-pointer group" onClick={() => navigate(`/movie/${m.id}`)}>
                             <div className="relative">
-                              <img src={m.poster} alt={m.title} className="w-20 h-28 object-cover rounded-xl group-hover:opacity-80 transition-opacity" />
+                              <img src={m.posterUrl} alt={m.title} className="w-20 h-28 object-cover rounded-xl group-hover:opacity-80 transition-opacity" />
                               <div className="absolute -top-2 -left-1 w-6 h-6 rounded-full flex items-center justify-center text-white" style={{ background: rankColors[idx], fontSize: "11px", fontWeight: 800 }}>
                                 {idx + 1}
                               </div>
@@ -188,7 +196,7 @@ export function Rankings() {
                       {shared.map(mid => {
                         const m = movies.find(mv => mv.id === mid);
                         return m ? (
-                          <img key={mid} src={m.poster} alt={m.title} className="w-8 h-12 object-cover rounded-md" title={m.title} />
+                          <img key={mid} src={m.posterUrl} alt={m.title} className="w-8 h-12 object-cover rounded-md" title={m.title} />
                         ) : null;
                       })}
                     </div>
@@ -204,7 +212,7 @@ export function Rankings() {
                 <h3 className="text-white text-sm" style={{ fontWeight: 700 }}>Top global ReviewFlix</h3>
               </div>
               <div className="space-y-3">
-                {movies.sort((a, b) => b.rating - a.rating).slice(0, 5).map((m, i) => (
+                {movies.slice().sort((a, b) => b.avgRating - a.avgRating).slice(0, 5).map((m, i) => (
                   <div
                     key={m.id}
                     className="flex items-center gap-3 cursor-pointer group"
@@ -213,12 +221,12 @@ export function Rankings() {
                     <span style={{ color: rankColors[i], fontWeight: 800, fontFamily: "'Bebas Neue', sans-serif", fontSize: "18px", width: 24 }}>
                       {i + 1}
                     </span>
-                    <img src={m.poster} alt={m.title} className="w-9 h-12 object-cover rounded-lg" />
+                    <img src={m.posterUrl} alt={m.title} className="w-9 h-12 object-cover rounded-lg" />
                     <div className="flex-1 min-w-0">
                       <p className="text-white text-sm truncate group-hover:text-[#e50914] transition-colors">{m.title}</p>
                       <div className="flex items-center gap-1">
                         <Star size={10} fill="#e50914" className="text-[#e50914]" />
-                        <span className="text-gray-500 text-xs">{m.rating}</span>
+                        <span className="text-gray-500 text-xs">{m.avgRating}</span>
                       </div>
                     </div>
                   </div>

@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
 import { Bookmark, Heart, List, SlidersHorizontal, Star, Clock, Plus, Trash2, Search } from "lucide-react";
-import { movies, watchlistMovies, favoriteMovies } from "../data/mockData";
+import { watchlistMovies, favoriteMovies } from "../data/mockData";
+import useMovies from "../../hooks/useMovies";
 
 const GENRES = ["Todos", "Sci-Fi", "Drama", "Thriller", "Crimen", "Romance", "Terror", "Animación", "Acción"];
 
@@ -12,6 +13,7 @@ export function Watchlist() {
   const [sortBy, setSortBy] = useState<"added" | "rating" | "year">("added");
   const [search, setSearch] = useState("");
 
+  const { movies } = useMovies();
   const wMovies = movies.filter(m => watchlistMovies.includes(m.id));
   const fMovies = movies.filter(m => favoriteMovies.includes(m.id));
 
@@ -20,7 +22,7 @@ export function Watchlist() {
       (genreFilter === "Todos" || m.genres.includes(genreFilter)) &&
       (search === "" || m.title.toLowerCase().includes(search.toLowerCase()))
     );
-    if (sortBy === "rating") filtered = [...filtered].sort((a, b) => b.rating - a.rating);
+    if (sortBy === "rating") filtered = [...filtered].sort((a, b) => b.avgRating - a.avgRating);
     if (sortBy === "year") filtered = [...filtered].sort((a, b) => b.year - a.year);
     return filtered;
   };
@@ -129,11 +131,11 @@ export function Watchlist() {
                       className="flex items-center gap-4 bg-[#111] border border-white/[0.06] rounded-2xl p-4 hover:border-white/10 transition-all group"
                     >
                       <img
-                        src={movie.poster}
-                        alt={movie.title}
-                        className="w-16 h-24 object-cover rounded-xl flex-shrink-0 cursor-pointer"
-                        onClick={() => navigate(`/movie/${movie.id}`)}
-                      />
+                            src={movie.posterUrl}
+                            alt={movie.title}
+                            className="w-16 h-24 object-cover rounded-xl flex-shrink-0 cursor-pointer"
+                            onClick={() => navigate(`/movie/${movie.id}`)}
+                          />
                       <div className="flex-1 min-w-0">
                         <h3
                           className="text-white cursor-pointer hover:text-[#e50914] transition-colors mb-1"
@@ -150,8 +152,8 @@ export function Watchlist() {
                         <p className="text-gray-500 text-xs">{movie.year} · {movie.director} · {movie.duration} min</p>
                         <div className="flex items-center gap-1 mt-1.5">
                           <Star size={11} fill="#e50914" className="text-[#e50914]" />
-                          <span className="text-white text-xs" style={{ fontWeight: 600 }}>{movie.rating}</span>
-                          <span className="text-gray-600 text-xs">({movie.votes.toLocaleString()} votos)</span>
+                          <span className="text-white text-xs" style={{ fontWeight: 600 }}>{movie.avgRating}</span>
+                          <span className="text-gray-600 text-xs">({movie.ratingCount.toLocaleString()} votos)</span>
                         </div>
                       </div>
                       <div className="flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -188,7 +190,7 @@ export function Watchlist() {
                 <div className="space-y-3">
                   {recommendations.map(m => (
                     <div key={m.id} className="flex items-center gap-3 cursor-pointer group" onClick={() => navigate(`/movie/${m.id}`)}>
-                      <img src={m.poster} alt={m.title} className="w-10 h-14 object-cover rounded-lg flex-shrink-0" />
+                      <img src={m.posterUrl} alt={m.title} className="w-10 h-14 object-cover rounded-lg flex-shrink-0" />
                       <div className="flex-1 min-w-0">
                         <p className="text-white text-sm truncate group-hover:text-[#e50914] transition-colors">{m.title}</p>
                         <p className="text-gray-600 text-xs">{m.genres[0]}</p>
@@ -232,7 +234,7 @@ export function Watchlist() {
                 </div>
                 <div className="flex gap-2">
                   {list.movies.slice(0, 4).map((m, i) => (
-                    <img key={`${m.id}-${i}`} src={m.poster} alt={m.title} className="w-14 h-20 object-cover rounded-xl" />
+                    <img key={`${m.id}-${i}`} src={m.posterUrl} alt={m.title} className="w-14 h-20 object-cover rounded-xl" />
                   ))}
                 </div>
               </div>

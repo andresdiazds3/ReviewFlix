@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router";
 import { Search, Home, Trophy, Users, MessageCircle, Bookmark, Film, ChevronDown, X, Clock, Trash2 } from "lucide-react";
-import { currentUser, movies } from "../data/mockData";
+import { currentUser } from "../data/mockData";
 import { useAuthContext } from "../../context/AuthorizationContext";
 import { useRecentSearches } from "../../hooks/useRecentSearches";
+import useMovies from "../../hooks/useMovies";
 
 export function Navbar() {
   const location = useLocation();
@@ -11,9 +12,10 @@ export function Navbar() {
   const { user, signOut } = useAuthContext();
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const { movies, loading: moviesLoading } = useMovies();
   const { recentSearches, addSearch, removeSearch, clearSearches } = useRecentSearches();
 
-  const filtered = searchQuery.length > 1
+  const filtered = (!moviesLoading && searchQuery.length > 1)
     ? movies.filter(m => m.title.toLowerCase().includes(searchQuery.toLowerCase())).slice(0, 5)
     : [];
 
@@ -128,7 +130,7 @@ export function Navbar() {
                               setSearchQuery("");
                             }}
                           >
-                            <img src={m.poster} alt={m.title} className="w-8 h-12 object-cover rounded" />
+                            <img src={m.posterUrl} alt={m.title} className="w-8 h-12 object-cover rounded" />
                             <div className="flex-1">
                               <p className="text-white text-sm">{m.title}</p>
                               <p className="text-gray-500 text-xs">{m.year} · {m.genres[0]}</p>

@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
 import { Users, Search, UserPlus, Star, TrendingUp, Bell, MessageCircle, Check, X } from "lucide-react";
-import { users, movies, reviews, currentUser } from "../data/mockData";
+import { users, reviews, currentUser } from "../data/mockData";
+import useMovies from "../../hooks/useMovies";
 import { ReviewCard } from "../components/ReviewCard";
 
 export function Social() {
@@ -9,6 +10,8 @@ export function Social() {
   const [tab, setTab] = useState<"activity" | "friends" | "discover">("activity");
   const [searchQ, setSearchQ] = useState("");
   const [following, setFollowing] = useState<Record<string, boolean>>({ u1: true, u2: true });
+
+  const { movies } = useMovies();
 
   const allActivity = [
     { type: "review", user: users[0], movie: movies[0], review: reviews[0], time: "5 min" },
@@ -112,7 +115,7 @@ export function Social() {
                         {(item.type === "rating" || item.type === "watchlist") && item.movie && (
                           <div className="mt-3 flex items-center gap-3">
                             <img
-                              src={item.movie.poster}
+                              src={item.movie.posterUrl}
                               alt={item.movie.title}
                               className="w-12 h-16 object-cover rounded-lg cursor-pointer"
                               onClick={() => navigate(`/movie/${item.movie!.id}`)}
