@@ -3,6 +3,7 @@ import { useNavigate } from "react-router";
 import { Trophy, GripVertical, Star, Users, Zap } from "lucide-react";
 import { users, currentUser } from "../data/mockData";
 import useMovies from "../../hooks/useMovies";
+import { getTopMoviesByRating } from "../../utils/movieRanking";
 
 const topMovieIds = ["m1", "m3", "m5", "m7", "m9"];
 
@@ -10,6 +11,7 @@ export function Rankings() {
   const navigate = useNavigate();
   const { movies } = useMovies();
   const [myTop, setMyTop] = useState(() => topMovieIds.map(() => null as any).filter(Boolean));
+  const topGlobalMovies = getTopMoviesByRating(movies, 5);
 
   useEffect(() => {
     if (movies.length && myTop.length === 0) {
@@ -212,7 +214,7 @@ export function Rankings() {
                 <h3 className="text-white text-sm" style={{ fontWeight: 700 }}>Top global ReviewFlix</h3>
               </div>
               <div className="space-y-3">
-                {movies.slice().sort((a, b) => b.avgRating - a.avgRating).slice(0, 5).map((m, i) => (
+                {topGlobalMovies.map((m, i) => (
                   <div
                     key={m.id}
                     className="flex items-center gap-3 cursor-pointer group"

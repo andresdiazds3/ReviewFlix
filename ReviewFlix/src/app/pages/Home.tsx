@@ -1,21 +1,25 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router";
 import { TrendingUp, Clock, Heart, Star, ChevronRight, Play, Sparkles } from "lucide-react";
-import { reviews, users, currentUser, watchlistMovies } from "../data/mockData";
+import { users, currentUser, watchlistMovies } from "../data/mockData";
 import useMovies from "../../hooks/useMovies";
 import { MovieCard } from "../components/MovieCard";
+import { useReviews } from "../../hooks/useReviews";
+import { getTopMoviesByRating } from "../../utils/movieRanking";
 
 export function Home() {
   const navigate = useNavigate();
   const { movies } = useMovies();
-  const featured = movies[0] ?? ({ id: "", title: "", year: 0, genres: [], duration: 0, backdropUrl: "", posterUrl: "", description: "", avgRating: 0 } as any);
+  const { reviews } = useReviews();
+  const rankedMovies = getTopMoviesByRating(movies, movies.length);
+  const featured = rankedMovies[0] ?? ({ id: "", title: "", year: 0, genres: [], duration: 0, backdropUrl: "", posterUrl: "", description: "", avgRating: 0 } as any);
 
-  const trending = movies.slice(0, 6);
-  const popular = movies.slice(2, 8);
-  const recommended = movies.slice(1, 7);
+  const trending = rankedMovies.slice(0, 6);
+  const popular = rankedMovies.slice(2, 8);
+  const recommended = rankedMovies.slice(1, 7);
   const watchlist = movies.filter(m => watchlistMovies.includes(m.id));
 
-  const friendReviews = reviews.filter(r => ["u1", "u2", "u3"].includes(r.userId)).slice(0, 4);
+  const friendReviews = reviews.filter(r => ["u1", "u2", "u3"].includes(r.userId) && r.movieId).slice(0, 4);
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white" style={{ fontFamily: "'Inter', sans-serif" }}>
@@ -134,11 +138,7 @@ export function Home() {
                           </div>
                           <p className="text-gray-400 text-sm leading-relaxed line-clamp-2">{review.content}</p>
                           <div className="flex items-center gap-4 mt-3">
-                            <button className={`flex items-center gap-1.5 text-xs transition-colors ${review.liked ? "text-[#e50914]" : "text-gray-500 hover:text-[#e50914]"}`}>
-                              <Heart size={12} fill={review.liked ? "#e50914" : "transparent"} />
-                              {review.likes}
-                            </button>
-                            <span className="text-gray-700 text-xs">{review.date}</span>
+                            <span className="text-gray-700 text-xs">{review.createdAt ? review.createdAt.split("T")[0] : ""}</span>
                           </div>
                         </div>
                       </div>

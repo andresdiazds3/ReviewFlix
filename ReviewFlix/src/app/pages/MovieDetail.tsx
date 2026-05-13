@@ -1,24 +1,28 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router";
 import { Star, Heart, Bookmark, Share2, Clock, Users, ChevronLeft, Send, ThumbsUp } from "lucide-react";
-import { reviews, users, currentUser } from "../data/mockData";
 import useMovies from "../../hooks/useMovies";
+import { useMovieReviews } from "../../hooks/useMovieReviews";
 import { MovieCard } from "../components/MovieCard";
 import { StarRating } from "../components/StarRating";
 import { ReviewCard } from "../components/ReviewCard";
+import { useAuthContext } from "../../context/AuthorizationContext";
+import { currentUser } from "../data/mockData";
 
 export function MovieDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
   const { movies, loading } = useMovies();
+  const { user } = useAuthContext();
   const [userRating, setUserRating] = useState(0);
   const [reviewText, setReviewText] = useState("");
   const [isLiked, setIsLiked] = useState(false);
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const { reviews: movieReviews, loading: reviewsLoading, submitReview, replyToReview, deleteReviewThread } = useMovieReviews(id ?? "");
 
-  if (loading) {
+  if (loading || reviewsLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#0a0a0a] text-white">
         <div className="text-center">
@@ -40,11 +44,11 @@ export function MovieDetail() {
     );
   }
 
-  const movieReviews = reviews.filter(r => r.movieId === movie.id || reviews.indexOf(r) < 3);
   const similar = movies.filter(m => m.id !== movie.id && m.genres.some(g => movie.genres.includes(g))).slice(0, 6);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (reviewText.trim() || userRating > 0) {
+      await submitReview({ rating: userRating, content: reviewText });
       setSubmitted(true);
       setTimeout(() => setSubmitted(false), 3000);
       setReviewText("");
@@ -52,13 +56,15 @@ export function MovieDetail() {
     }
   };
 
-  const ratingDist = [
-    { stars: 5, pct: 52 },
-    { stars: 4, pct: 28 },
-    { stars: 3, pct: 13 },
-    { stars: 2, pct: 5 },
-    { stars: 1, pct: 2 },
-  ];
+  const ratedReviews = movieReviews.filter(review => review.rating > 0);
+  const totalRatedReviews = ratedReviews.length || 1;
+  const ratingDist = [5, 4, 3, 2, 1].map((stars) => {
+    const count = ratedReviews.filter(review => Math.round(review.rating) === stars).length;
+    return {
+      stars,
+      pct: Math.round((count / totalRatedReviews) * 100),
+    };
+  });
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white" style={{ fontFamily: "'Inter', sans-serif" }}>
@@ -210,8 +216,8 @@ export function MovieDetail() {
               />
               <div className="flex items-center justify-between mt-3">
                 <div className="flex items-center gap-2">
-                  <img src={currentUser.avatar} alt="" className="w-7 h-7 rounded-full object-cover" />
-                  <span className="text-gray-500 text-sm">Como {currentUser.name}</span>
+                  <img src={user?.photoURL || currentUser.avatar} alt="" className="w-7 h-7 rounded-full object-cover" />
+                  <span className="text-gray-500 text-sm">Como {user?.displayName || currentUser.name}</span>
                 </div>
                 <button
                   onClick={handleSubmit}
@@ -235,12 +241,12 @@ export function MovieDetail() {
             <h2 className="text-white" style={{ fontWeight: 700, fontSize: "20px" }}>Reseñas de la comunidad</h2>
               <div className="flex items-center gap-2">
                 <Users size={14} className="text-gray-500" />
-                <span className="text-gray-500 text-sm">{movie.ratingCount.toLocaleString()} reseñas</span>
+                <span className="text-gray-500 text-sm">{movieReviews.length.toLocaleString()} reseñas</span>
               </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {movieReviews.map(review => (
-              <ReviewCard key={review.id} review={review} />
+              <ReviewCard key={review.id} review={review} onReply={replyToReview} onDelete={deleteReviewThread} />
             ))}
           </div>
         </div>

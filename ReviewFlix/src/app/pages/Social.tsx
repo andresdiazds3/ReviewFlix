@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
 import { Users, Search, UserPlus, Star, TrendingUp, Bell, MessageCircle, Check, X } from "lucide-react";
-import { users, reviews, currentUser } from "../data/mockData";
+import { users, currentUser } from "../data/mockData";
 import useMovies from "../../hooks/useMovies";
 import { ReviewCard } from "../components/ReviewCard";
+import { useReviews } from "../../hooks/useReviews";
 
 export function Social() {
   const navigate = useNavigate();
@@ -12,12 +13,13 @@ export function Social() {
   const [following, setFollowing] = useState<Record<string, boolean>>({ u1: true, u2: true });
 
   const { movies } = useMovies();
+  const { reviews } = useReviews();
 
   const allActivity = [
     { type: "review", user: users[0], movie: movies[0], review: reviews[0], time: "5 min" },
     { type: "rating", user: users[1], movie: movies[3], rating: 5, time: "23 min" },
     { type: "watchlist", user: users[0], movie: movies[7], time: "1h" },
-    { type: "review", user: users[2], movie: movies[2], review: reviews[2], time: "2h" },
+    { type: "review", user: users[2], movie: movies[2], review: reviews[1] ?? reviews[0], time: "2h" },
     { type: "top5", user: users[1], time: "3h" },
     { type: "rating", user: users[0], movie: movies[8], rating: 4, time: "5h" },
   ];

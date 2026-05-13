@@ -15,7 +15,7 @@ export const useCreate = (
       const ref =
         collection(db, collectionName);
 
-      await addDoc(ref, data);
+      return await addDoc(ref, data);
     };
 
   return { createDocument };

@@ -16,8 +16,14 @@ export const useCollection = (
 
   const [documents, setDocuments] =
     useState<any[]>([]);
+  const [loading, setLoading] =
+    useState(true);
+  const [error, setError] =
+    useState<string | null>(null);
 
   useEffect(() => {
+    setLoading(true);
+    setError(null);
 
     const ref =
       collection(db, collectionName);
@@ -32,11 +38,15 @@ export const useCollection = (
           }));
 
         setDocuments(results);
+        setLoading(false);
+      }, err => {
+        setError(String(err));
+        setLoading(false);
       });
 
     return () => unsubscribe();
 
   }, [collectionName]);
 
-  return { documents };
+  return { documents, loading, error };
 };

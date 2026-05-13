@@ -3,11 +3,14 @@ import { collection, onSnapshot } from "firebase/firestore";
 import { firestore } from "../services/firebase";
 import { Trie } from "../classes/Trie/Trie";
 import type { Movie } from "../types/Movie";
+import { useReviews } from "./useReviews";
+import { enrichMoviesWithReviewMetrics } from "../utils/reviewMetrics";
 
 export function useMovies() {
   const [movies, setMovies] = useState<Movie[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { metricsByMovieId, loading: reviewsLoading } = useReviews();
 
   useEffect(() => {
     setLoading(true);
@@ -52,15 +55,19 @@ export function useMovies() {
     return () => unsub();
   }, []);
 
+  const moviesWithRatings = useMemo(() => {
+    return enrichMoviesWithReviewMetrics(movies, metricsByMovieId);
+  }, [metricsByMovieId, movies]);
+
   const trie = useMemo(() => {
     const t = new Trie();
-    for (const m of movies) {
+    for (const m of moviesWithRatings) {
       try { t.insert(m); } catch (e) { /* ignore single insert errors */ }
     }
     return t;
-  }, [movies]);
+  }, [moviesWithRatings]);
 
-  return { movies, loading, error, trie };
+  return { movies: moviesWithRatings, loading: loading || reviewsLoading, error, trie };
 }
 
 export default useMovies;

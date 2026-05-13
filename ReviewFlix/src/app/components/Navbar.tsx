@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router";
-import { Search, Home, Trophy, Users, MessageCircle, Bookmark, Film, ChevronDown, X, Clock, Trash2 } from "lucide-react";
+import { Search, Home, Trophy, Users, MessageCircle, Bookmark, Film, ChevronDown, X, Clock, Trash2, Star } from "lucide-react";
 import { currentUser } from "../data/mockData";
 import { useAuthContext } from "../../context/AuthorizationContext";
 import { useRecentSearches } from "../../hooks/useRecentSearches";
 import useMovies from "../../hooks/useMovies";
+import { SearchTop } from "../../classes/Heap/SearchTop";
 
 export function Navbar() {
   const location = useLocation();
@@ -12,11 +13,11 @@ export function Navbar() {
   const { user, signOut } = useAuthContext();
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const { movies, loading: moviesLoading } = useMovies();
+  const { loading: moviesLoading, trie } = useMovies();
   const { recentSearches, addSearch, removeSearch, clearSearches } = useRecentSearches();
 
-  const filtered = (!moviesLoading && searchQuery.length > 1)
-    ? movies.filter(m => m.title.toLowerCase().includes(searchQuery.toLowerCase())).slice(0, 5)
+  const filtered = (!moviesLoading && searchQuery.trim().length > 1)
+    ? SearchTop(trie, searchQuery.trim(), 5)
     : [];
 
   // Manejar búsqueda personalizada (cualquier tipo)
@@ -134,6 +135,10 @@ export function Navbar() {
                             <div className="flex-1">
                               <p className="text-white text-sm">{m.title}</p>
                               <p className="text-gray-500 text-xs">{m.year} · {m.genres[0]}</p>
+                            </div>
+                            <div className="flex items-center gap-1 text-xs text-gray-400 flex-shrink-0">
+                              <Star size={10} fill="#e50914" className="text-[#e50914]" />
+                              <span>{m.avgRating > 0 ? m.avgRating.toFixed(1) : "Sin rating"}</span>
                             </div>
                             <span className="text-xs bg-[#e50914]/20 text-[#e50914] px-2 py-1 rounded">Película</span>
                           </button>
